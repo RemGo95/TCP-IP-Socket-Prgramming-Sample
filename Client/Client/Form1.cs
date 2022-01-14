@@ -19,19 +19,73 @@ namespace Client
         public StreamReader STR;
         public StreamWriter STW;
         public string recieve;
-        public String TextToSend;
-        public Form1()
+        public String OutputData;
+        string ip = "192.168.73.1";
+        string port = "12000";
+        
+        int _ConnectionErrorHandler=0;
+        
+        public override void Initialize()
         {
-            InitializeComponent();
+            base.Initialize();
             IPAddress[] localIP = Dns.GetHostAddresses(Dns.GetHostName());
+            string ipAndPort = ip + "\n" + port;
+            ConnectionError.text = ipAndPort;
 
             foreach (IPAddress address in localIP)
             {
-                if (address.AddressFamily == AddressFamily.InterNetwork)
+                if(address.AddressFamily == AddressFamily.InterNetwork)
                 {
-                    txtIP.Text = address.ToString();
+                    //txtIP.Text = address.ToString();
                 }
             }
+        }
+        
+        public async Task SendData()
+        {
+            await Task.Run(() =>
+            {
+            
+
+                client = new TcpClient();
+                IPEndPoint IpEnd = new IPEndPoint(IPAddress.Parse(ip), int.Parse(port));
+
+                try
+                {
+                    client.Connect(IpEnd);
+
+                    if (client.Connected)
+                    {
+                        //txtLogs.AppendText("Connected to server" + "\n");
+                        STW = new StreamWriter(client.GetStream());
+                        STR = new StreamReader(client.GetStream());
+                        STW.AutoFlush = true;
+
+                        STW.WriteLine(OutputData);
+
+                       // backgroundWorker1.RunWorkerAsync();
+                       // backgroundWorker2.WorkerSupportsCancellation = true;
+                        //txtLogs.Text += "Client Connected\n";
+                        ConnectionError.text = ("Client Connected!!!").ToString();
+                        //lblStatus.Text = "connected";
+
+                    }
+                    else
+                    {
+                        //txtLogs.Text += "Client did not connect\n";
+                        ConnectionError.text = ("Problem with Connection!!!").ToString();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //lblStatus.Text = "Error";
+                    //txtLogs.Text += "Client could not connect\n>>>" + ex.Message.ToString() + "\n";
+                    ConnectionError.text = ("Problem with Connection!!!").ToString();
+                }
+
+
+                Task.Delay(100).Wait();
+            });
         }
         
 
@@ -69,16 +123,7 @@ namespace Client
             }
         }
 
-        private void btnSend_Click(object sender, EventArgs e)
-        {
-            if (txtMSG.Text != "")
-            {
-                TextToSend = txtMSG.Text;
-                backgroundWorker2.RunWorkerAsync();
-            }
-            txtMSG.Text = "";
-        }
-
+        
         private void backgroundWorker2_DoWork(object sender, DoWorkEventArgs e)
         {
             if (client.Connected)
