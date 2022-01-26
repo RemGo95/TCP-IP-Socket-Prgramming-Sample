@@ -232,6 +232,19 @@ class TCPNewClientTest: MonoBehaviour{
     }
     }   
 
+	public void EnableDisable()
+    {
+        if (PackageNN.GetComponent<Pack_AI>().isActiveAndEnabled)
+        {
+			PackageNN.GetComponent<Pack_AI>().enabled = false;
+		}
+        else
+        {
+			PackageNN.GetComponent<Pack_AI>().enabled = true;
+		}
+		
+	}
+
 
 
 
